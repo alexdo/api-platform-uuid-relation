@@ -2,8 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiFilter;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -18,9 +16,8 @@ use Ramsey\Uuid\UuidInterface;
  *
  * @ApiResource
  * @ORM\Entity
- * @ApiFilter(SearchFilter::class, properties={"greeters": "exact"})
  */
-class Greeting
+class Greeter
 {
     /**
      * @var int
@@ -45,25 +42,24 @@ class Greeting
      * @ORM\Column
      * @Assert\NotBlank
      */
-    public $name = '';
+    public $greeterName = '';
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Greeter", inversedBy="greetings", cascade={"persist"}, orphanRemoval=true, fetch="EXTRA_LAZY")
-     * @ORM\JoinTable("greeting_greeters")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Greeting", mappedBy="greeters", fetch="EXTRA_LAZY")
      * @Assert\Valid()
      *
-     * @var Collection<Greeter>
+     * @var Collection<Greeting>
      */
-    private $greeters;
-
+    private $greetings;
     /**
-     * Greeting constructor.
+     * Greeters constructor.
      */
     public function __construct()
     {
         $this->uuid = Uuid::uuid4();
-        $this->greeters = new ArrayCollection();
+        $this->greetings = new ArrayCollection();
     }
+
 
     public function getId(): int
     {
@@ -80,9 +76,9 @@ class Greeting
 
     /**
      * @param UuidInterface $uuid
-     * @return Greeting
+     * @return Greeter
      */
-    public function setUuid(UuidInterface $uuid): Greeting
+    public function setUuid(UuidInterface $uuid): Greeter
     {
         $this->uuid = $uuid;
         return $this;
@@ -91,48 +87,47 @@ class Greeting
     /**
      * @return string
      */
-    public function getName(): string
+    public function getGreeterName(): string
     {
-        return $this->name;
+        return $this->greeterName;
     }
 
     /**
-     * @param string $name
-     * @return Greeting
+     * @param string $greeterName
+     * @return Greeter
      */
-    public function setName(string $name): Greeting
+    public function setGreeterName(string $greeterName): Greeter
     {
-        $this->name = $name;
+        $this->greeterName = $greeterName;
         return $this;
     }
 
     /**
      * @return Collection
      */
-    public function getGreeters(): Collection
+    public function getGreetings(): Collection
     {
-        return $this->greeters;
+        return $this->greetings;
     }
 
     /**
-     * @param Collection $greeters
-     * @return Greeting
+     * @param Collection $greetings
+     * @return Greeter
      */
-    public function setGreeters(Collection $greeters): Greeting
+    public function setGreetings(Collection $greetings): Greeter
     {
-        $this->greeters = $greeters;
+        $this->greetings = $greetings;
         return $this;
     }
 
-    public function addGreeter(Greeter $greeter): self
+    public function addGreeting(Greeting $greeting): self
     {
-        if (!$this->greeters->contains($greeter)) {
-            $this->greeters[] = $greeter;
-            $greeter->addGreeting($this);
+        if (!$this->greetings->contains($greeting)) {
+            $this->greetings[] = $greeting;
+            $greeting->addGreeter($this);
         }
 
         return $this;
     }
-
 
 }
